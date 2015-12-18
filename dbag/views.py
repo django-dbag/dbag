@@ -1,12 +1,13 @@
 import datetime
+import json
 import time
 
 from django import http
 from django.forms.models import model_to_dict
 from django.shortcuts import render, get_object_or_404
-from django.utils import simplejson
 
 from dbag.models import Metric
+
 
 def index(request):
     metrics = Metric.objects.all().order_by('label')
@@ -17,6 +18,7 @@ def index(request):
         data.append({'metric': metric, 'latest': latest})
 
     return render(request, 'dbag/index.html', {'data': data})
+
 
 def metric_detail(request, metric_slug):
     metric = get_object_or_404(Metric, slug=metric_slug)
@@ -29,6 +31,7 @@ def metric_detail(request, metric_slug):
             'latest': metric.get_latest_sample(),
         }
     )
+
 
 def metric_json(request, metric_slug):
     metric = get_object_or_404(Metric, slug=metric_slug)
@@ -51,9 +54,5 @@ def metric_json(request, metric_slug):
         )
 
     return http.HttpResponse(
-        simplejson.dumps(metric_dict, indent=2),
+        json.dumps(metric_dict, indent=2),
         content_type="application/json")
-
-
-
-
