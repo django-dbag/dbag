@@ -30,7 +30,6 @@ setup(
     platforms=['any'],
     classifiers=CLASSIFIERS,
     install_requires=[
-        'nexus>=0.1.7',
         'django-jsonfield',
         'Django>=1.1',
     ],
