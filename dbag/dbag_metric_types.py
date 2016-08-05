@@ -1,13 +1,14 @@
-
-from django.contrib.auth.models import User
+from django.conf import settings
 
 from dbag import dbag_manager
 from dbag.metric_types import QueryMetric
 
+
 class UserMetric(QueryMetric):
-    query_model = User
+    query_model = settings.AUTH_USER_MODEL
 
 dbag_manager.register_metric_type('users_metric', UserMetric)
+
 
 class ActiveUsersCount(UserMetric):
     default_query_filter = {'key': 'is_active', 'value': True}

@@ -1,13 +1,14 @@
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core import management
 from django.test import TestCase
 from django.test.client import Client
+from django.contrib.auth import get_user_model
 
 from dbag.manager import MetricManager
 from dbag.models import DataSample, Metric
 from dbag.dbag_metric_types import UserMetric, ActiveUsersCount
+
 
 class ContribMetricsTest(TestCase):
     """
@@ -15,7 +16,11 @@ class ContribMetricsTest(TestCase):
     """
 
     def setUp(self):
-        self.user = User.objects.create(username='admin', email='admin@example.com')
+        User = get_user_model()
+        self.user = User.objects.create(
+            username='admin',
+            email='admin@example.com',
+        )
         self.dbag = MetricManager()
         self.dbag.register_metric_type('users_metric', UserMetric)
         self.dbag.register_metric_type('active_users_count', ActiveUsersCount)
@@ -68,6 +73,7 @@ class ContribMetricsTest(TestCase):
         latest_sample = staff_user_count.get_latest_sample()
 
         self.assertEqual(latest_sample.value, 1)
+
 
 class CommandsTest(TestCase):
     """
@@ -162,8 +168,8 @@ class ClientTests(TestCase):
 
         self.assertContains(response, 'Number of Active User Accounts')
         self.assertContains(response, 'Number of User Accounts')
-        # One for each metric and one if the first collected metric (the oldest)
-        # has no data
+        # One for each metric and one if the first collected metric (the
+        # oldest) has no data
         self.assertContains(response, 'class="no-data-collected"', 2 + 1)
         self.assertNotContains(response, settings.TEMPLATE_STRING_IF_INVALID)
 
