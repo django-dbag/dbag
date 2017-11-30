@@ -1,9 +1,10 @@
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core import management
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
-from django.contrib.auth import get_user_model
 
 from dbag.manager import MetricManager
 from dbag.models import DataSample, Metric
@@ -141,8 +142,6 @@ class ClientTests(TestCase):
     """
     Test the views.
     """
-    urls = 'tests.test_urls'
-
     def setUp(self):
         self.dbag = MetricManager()
         self.dbag.register_metric_type('users_metric', UserMetric)
@@ -164,7 +163,8 @@ class ClientTests(TestCase):
 
     def test_no_metrics_collected_index(self):
         # When a metric has no data yet, we shouldn't crash
-        response = self.client.get('/dbag/')
+        url = reverse('dbag-index')
+        response = self.client.get(url)
 
         self.assertContains(response, 'Number of Active User Accounts')
         self.assertContains(response, 'Number of User Accounts')
@@ -181,7 +181,8 @@ class ClientTests(TestCase):
         for ds in DataSample.objects.all():
             self.assertEqual(ds.value, 0)
 
-        response = self.client.get('/dbag/')
+        url = reverse('dbag-index')
+        response = self.client.get(url)
 
         self.assertContains(response, 'Number of Active User Accounts')
         self.assertContains(response, 'Number of User Accounts')
