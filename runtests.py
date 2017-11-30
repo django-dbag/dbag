@@ -20,18 +20,34 @@ if not settings.configured:
             'django.contrib.contenttypes',
 
             'dbag',
-
-            'tests',
         ],
-        ROOT_URLCONF='',
+        ROOT_URLCONF='dbag.urls',
         DEBUG=False,
-        TEMPLATE_DEBUG=True,
         TEMPLATE_STRING_IF_INVALID="INVALID_TEMPLATE_VARIABLE",
+        TEMPLATES=[{
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'debug': True,
+                'string_if_invalid': 'INVALID_TEMPLATE_VARIABLE',
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.i18n',
+                    'django.template.context_processors.media',
+                    'django.template.context_processors.static',
+                    'django.template.context_processors.request',
+                ]
+            }
+        }],
+        SILENCED_SYSTEM_CHECKS=[
+            'admin.E402',
+        ],
     )
 
 
 def runtests():
-    argv = sys.argv[:1] + ['test', 'tests', '--traceback'] + sys.argv[1:]  # noqa
+    argv = sys.argv[:1] + ['test', 'dbag', '--traceback'] + sys.argv[1:]  # noqa
     execute_from_command_line(argv)
 
 if __name__ == '__main__':
