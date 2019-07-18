@@ -18,6 +18,7 @@ if not settings.configured:
             'django.contrib.admin',
             'django.contrib.sessions',
             'django.contrib.contenttypes',
+            'django.contrib.messages',
 
             'dbag',
         ],
@@ -37,9 +38,15 @@ if not settings.configured:
                     'django.template.context_processors.media',
                     'django.template.context_processors.static',
                     'django.template.context_processors.request',
+                    'django.contrib.messages.context_processors.messages',
                 ]
             }
         }],
+        MIDDLEWARE=[
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+        ],
         SILENCED_SYSTEM_CHECKS=[
             'admin.E402',
         ],
@@ -49,6 +56,7 @@ if not settings.configured:
 def runtests():
     argv = sys.argv[:1] + ['test', 'dbag', '--traceback'] + sys.argv[1:]  # noqa
     execute_from_command_line(argv)
+
 
 if __name__ == '__main__':
     runtests()
