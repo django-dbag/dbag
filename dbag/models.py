@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.urls import reverse
 
 from jsonfield import JSONField
 
@@ -74,9 +75,8 @@ class Metric(models.Model):
     def __unicode__(self):
         return self.label
 
-    @models.permalink
     def get_absolute_url(self):
-        return ("dbag-metric-detail", [self.slug])
+        return reverse("dbag-metric-detail", args=[self.slug])
 
     def get_latest_sample(self):
         try:
@@ -150,7 +150,7 @@ class DataSample(models.Model):
         by the ``utc_timestamp``
 
     """
-    metric = models.ForeignKey(Metric)
+    metric = models.ForeignKey(Metric, on_delete=models.CASCADE)
     utc_timestamp = models.DateTimeField(default=datetime.datetime.utcnow)
     value = models.BigIntegerField()
 
@@ -176,8 +176,8 @@ class DashboardPanel(models.Model):
         temporarily.
 
     """
-    metric = models.ForeignKey(Metric)
-    dashboard = models.ForeignKey(Dashboard)
+    metric = models.ForeignKey(Metric, on_delete=models.CASCADE)
+    dashboard = models.ForeignKey(Dashboard, on_delete=models.CASCADE)
     do_display = models.BooleanField(default=True)
     show_sparkline = models.BooleanField(default=True)
 

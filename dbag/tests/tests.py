@@ -2,9 +2,9 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 
 from dbag.manager import MetricManager
 from dbag.models import DataSample, Metric
