@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
 
 class Field(object):
     default_help_text = None
@@ -95,7 +98,10 @@ class QueryMetric(MetricType):
 
     def build_queryset(self, metric):
         # Build the queryset object. This is the most common thing to overwrite
-        return self.query_model.objects.all()
+        query_model = self.query_model
+        if self.query_model == settings.AUTH_USER_MODEL:
+            query_model = get_user_model()
+        return query_model.objects.all()
 
     def filter_queryset(self, queryset, query_filter):
         if query_filter:

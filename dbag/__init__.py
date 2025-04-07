@@ -3,7 +3,7 @@ Dbag- Easy time-series metrics and dashboarding
 """
 import copy
 
-__version__ = '0.1.2'
+__version__ = '0.2.0'
 __author__ = 'Wes Winham'
 __contact__ = 'winhamwr@gmail.com'
 __homepage__ = 'http://github.com/winhamwr/dbag'
@@ -18,7 +18,7 @@ def autodiscover():
     all ``INSTALLED_APPS``.
     """
     from django.conf import settings
-    from django.utils.importlib import import_module
+    from importlib import import_module
 
     for app in settings.INSTALLED_APPS:
         # Attempt to import the dbag_metric_types module
@@ -31,4 +31,3 @@ def autodiscover():
             # this import will have to reoccur on the next request and this
             # could raise NotRegistered and AlreadyRegistered exceptions
             dbag_manager._registry = before_import_registry
-

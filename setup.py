@@ -30,9 +30,7 @@ setup(
     platforms=['any'],
     classifiers=CLASSIFIERS,
     install_requires=[
-        'nexus>=0.1.7',
-        'django-jsonfield',
-        'Django>=1.1',
+        'Django>=3.1',
     ],
     test_suite='runtests.runtests',
     include_package_data=True,

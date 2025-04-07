@@ -1,13 +1,15 @@
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import management
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 
 from dbag.manager import MetricManager
 from dbag.models import DataSample, Metric
 from dbag.dbag_metric_types import UserMetric, ActiveUsersCount
+
 
 class ContribMetricsTest(TestCase):
     """
@@ -15,7 +17,11 @@ class ContribMetricsTest(TestCase):
     """
 
     def setUp(self):
-        self.user = User.objects.create(username='admin', email='admin@example.com')
+        User = get_user_model()
+        self.user = User.objects.create(
+            username='admin',
+            email='admin@example.com',
+        )
         self.dbag = MetricManager()
         self.dbag.register_metric_type('users_metric', UserMetric)
         self.dbag.register_metric_type('active_users_count', ActiveUsersCount)
@@ -68,6 +74,7 @@ class ContribMetricsTest(TestCase):
         latest_sample = staff_user_count.get_latest_sample()
 
         self.assertEqual(latest_sample.value, 1)
+
 
 class CommandsTest(TestCase):
     """
@@ -135,8 +142,6 @@ class ClientTests(TestCase):
     """
     Test the views.
     """
-    urls = 'tests.test_urls'
-
     def setUp(self):
         self.dbag = MetricManager()
         self.dbag.register_metric_type('users_metric', UserMetric)
@@ -158,12 +163,13 @@ class ClientTests(TestCase):
 
     def test_no_metrics_collected_index(self):
         # When a metric has no data yet, we shouldn't crash
-        response = self.client.get('/dbag/')
+        url = reverse('dbag-index')
+        response = self.client.get(url)
 
         self.assertContains(response, 'Number of Active User Accounts')
         self.assertContains(response, 'Number of User Accounts')
-        # One for each metric and one if the first collected metric (the oldest)
-        # has no data
+        # One for each metric and one if the first collected metric (the
+        # oldest) has no data
         self.assertContains(response, 'class="no-data-collected"', 2 + 1)
         self.assertNotContains(response, settings.TEMPLATE_STRING_IF_INVALID)
 
@@ -175,9 +181,39 @@ class ClientTests(TestCase):
         for ds in DataSample.objects.all():
             self.assertEqual(ds.value, 0)
 
-        response = self.client.get('/dbag/')
+        url = reverse('dbag-index')
+        response = self.client.get(url)
 
         self.assertContains(response, 'Number of Active User Accounts')
         self.assertContains(response, 'Number of User Accounts')
         self.assertNotContains(response, 'class="no-data-collected"')
         self.assertNotContains(response, settings.TEMPLATE_STRING_IF_INVALID)
+
+
+class JSONFieldTest(TestCase):
+    """
+    Test the update from django-jsonfield to Django's models.JSONField
+    """
+    def test_json_field(self):
+        # Test storing and retrieving JSON
+        metric = Metric.objects.create(
+            metric_type_label="type_label",
+            metric_properties={"key": "metric_value"},
+            slug="slug",
+            label="label",
+            unit_label="unit_label",
+            unit_label_plural="unit_labels"
+        )
+
+        saved_metric = Metric.objects.get(id=metric.id)
+        self.assertEqual(saved_metric.metric_properties["key"], "metric_value")
+
+        # Test the default value for metric_properties
+        empty_metric_properties = Metric.objects.create(
+            metric_type_label="type_label_2",
+            slug="slug_2",
+            label="label_2",
+            unit_label="unit_label_2",
+            unit_label_plural="unit_labels_2"
+        )
+        self.assertEqual(empty_metric_properties.metric_properties, {})
